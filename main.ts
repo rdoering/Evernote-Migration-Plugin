@@ -1,7 +1,6 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import { Client } from 'evernote';
 
-// Remember to rename these classes and interfaces!
 
 interface EvernoteMigrationPluginSettings {
 	consumerKey: string;
@@ -101,6 +100,7 @@ class ModalWindow extends Modal {
 
 	constructor(app: App, settings: EvernoteMigrationPluginSettings) {
 		super(app);
+    this.settings = settings;
 	}
 
 	onOpen() {
@@ -114,7 +114,7 @@ class ModalWindow extends Modal {
         .onClick(() => {
           var callbackUrl = "obsidian://";
 
-          var client = new Evernote.Client({
+          var client = new Client({
             consumerKey: this.settings.consumerKey,
             consumerSecret: this.settings.consumerSecret,
             sandbox: true,
