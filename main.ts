@@ -1,14 +1,16 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-import { Evernote } from 'evernote';
+import { Client } from 'evernote';
 
 // Remember to rename these classes and interfaces!
 
 interface EvernoteMigrationPluginSettings {
-	mySetting: string;
+	consumerKey: string;
+  consumerSecret: string;
 }
 
 const DEFAULT_SETTINGS: EvernoteMigrationPluginSettings = {
-	mySetting: 'default'
+	consumerKey: '',
+  consumerSecret: ''
 }
 
 export default class EvernoteMigrationPlugin extends Plugin {
@@ -34,7 +36,7 @@ export default class EvernoteMigrationPlugin extends Plugin {
 			id: 'open-sample-modal-simple',
 			name: 'Open sample modal (simple)',
 			callback: () => {
-				new ModalWindow(this.app).open();
+				new ModalWindow(this.app, this.settings).open();
 			}
 		});
 
@@ -95,7 +97,9 @@ export default class EvernoteMigrationPlugin extends Plugin {
 }
 
 class ModalWindow extends Modal {
-	constructor(app: App) {
+  settings: EvernoteMigrationPluginSettings;
+
+	constructor(app: App, settings: EvernoteMigrationPluginSettings) {
 		super(app);
 	}
 
@@ -111,8 +115,8 @@ class ModalWindow extends Modal {
           var callbackUrl = "obsidian://";
 
           var client = new Evernote.Client({
-            consumerKey: 'user1',
-            consumerSecret: '3dac781b18d64da7',
+            consumerKey: this.settings.consumerKey,
+            consumerSecret: this.settings.consumerSecret,
             sandbox: true,
             china: false,
           });
@@ -156,18 +160,30 @@ class EvernoteMigrationSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl('h2', {text: 'Settings for my awesome plugin.'});
+		containerEl.createEl('h2', {text: 'Evernote Migraion Plugin Settings'});
+
+    new Setting(containerEl).setName('OAuth').setHeading();
 
 		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
+			.setName('Oauth Consumer Key')
+			.setDesc('This key was created by evernote')
 			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
+				.setPlaceholder('Enter your Consumer Key')
+				.setValue(this.plugin.settings.consumerKey)
 				.onChange(async (value) => {
-					console.log('Secret: ' + value);
-					this.plugin.settings.mySetting = value;
+					this.plugin.settings.consumerKey = value;
 					await this.plugin.saveSettings();
 				}));
+
+    new Setting(containerEl)
+      .setName('Oauth Consumer Secret')
+      .setDesc('It\'s a secret')
+      .addText(text => text
+        .setPlaceholder('Enter your Consumer Secret')
+        .setValue(this.plugin.settings.consumerSecret)
+        .onChange(async (value) => {
+          this.plugin.settings.consumerSecret = value;
+          await this.plugin.saveSettings();
+        }));
 	}
 }

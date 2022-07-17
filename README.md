@@ -56,6 +56,7 @@ The location of the Obsidian plugin folder depends on the host operation system.
 - [x] get consumer key
 - [x] get access key
 - [x] update project docu
+- [x] add settings for "Consumer Key" and "Consumer Secret"
 - [ ] import Evernote module
 - [ ] redirect user to evernote login
 - [ ] implemented evernote module
