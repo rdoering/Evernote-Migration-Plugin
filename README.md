@@ -37,7 +37,7 @@ Quick starting guide for new plugin devs:
 
 ## Obsidian plgin folder located
 The location of the Obsidian plugin folder depends on the host operation system. To open the location open the Obsidian `settings`, open `Community Plugins` and click on the `folder icon` as shown in the screen shot.
-![[./doc/assets/screenshot_plugin_folder.png]]
+![Sceenhot of the settings menu with the folder icon](./doc/assets/screenshot_plugin_folder.png)
 
 ## Manually installing the plugin
 - Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
