@@ -1,17 +1,18 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { Evernote } from 'evernote';
 
 // Remember to rename these classes and interfaces!
 
-interface MyPluginSettings {
+interface EvernoteMigrationPluginSettings {
 	mySetting: string;
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
+const DEFAULT_SETTINGS: EvernoteMigrationPluginSettings = {
 	mySetting: 'default'
 }
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class EvernoteMigrationPlugin extends Plugin {
+	settings: EvernoteMigrationPluginSettings;
 
 	async onload() {
 		await this.loadSettings();
@@ -33,9 +34,10 @@ export default class MyPlugin extends Plugin {
 			id: 'open-sample-modal-simple',
 			name: 'Open sample modal (simple)',
 			callback: () => {
-				new SampleModal(this.app).open();
+				new ModalWindow(this.app).open();
 			}
 		});
+
 		// This adds an editor command that can perform some operation on the current editor instance
 		this.addCommand({
 			id: 'sample-editor-command',
@@ -45,6 +47,7 @@ export default class MyPlugin extends Plugin {
 				editor.replaceSelection('Sample Editor Command');
 			}
 		});
+		
 		// This adds a complex command that can check whether the current state of the app allows execution of the command
 		this.addCommand({
 			id: 'open-sample-modal-complex',
@@ -56,7 +59,7 @@ export default class MyPlugin extends Plugin {
 					// If checking is true, we're simply "checking" if the command can be run.
 					// If checking is false, then we want to actually perform the operation.
 					if (!checking) {
-						new SampleModal(this.app).open();
+						new ModalWindow(this.app).open();
 					}
 
 					// This command will only show up in Command Palette when the check function returns true
@@ -66,7 +69,7 @@ export default class MyPlugin extends Plugin {
 		});
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+		this.addSettingTab(new EvernoteMigrationSettingTab(this.app, this));
 
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
@@ -91,14 +94,47 @@ export default class MyPlugin extends Plugin {
 	}
 }
 
-class SampleModal extends Modal {
+class ModalWindow extends Modal {
 	constructor(app: App) {
 		super(app);
 	}
 
 	onOpen() {
 		const {contentEl} = this;
-		contentEl.setText('Woah!');
+		contentEl.setText('Woah!!!');
+
+		new Setting(contentEl).addButton((btn) =>
+      btn
+        .setButtonText("Evernote Auth")
+        .setCta()
+        .onClick(() => {
+          var callbackUrl = "obsidian://";
+
+          var client = new Evernote.Client({
+            consumerKey: 'user1',
+            consumerSecret: '3dac781b18d64da7',
+            sandbox: true,
+            china: false,
+          });
+
+          var myOauthToken: string;
+          var myOauthTokenSecret: string;
+          client.getRequestToken(callbackUrl, (error: boolean, oauthToken: string, oauthTokenSecret: string) => {
+            if (error) {
+              console.log('getRequestToken() failed');
+            }
+            // store your token here somewhere - for this example we use req.session
+            myOauthToken = oauthToken;
+            myOauthTokenSecret = oauthTokenSecret;
+            console.log('browse to ' + client.getAuthorizeUrl(oauthToken))
+            //.redirect(client.getAuthorizeUrl(oauthToken)); // send the user to Evernote
+            }
+          );
+
+
+          console.log('clicked by evernote migration plugin');
+        })
+    );
 	}
 
 	onClose() {
@@ -107,10 +143,10 @@ class SampleModal extends Modal {
 	}
 }
 
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+class EvernoteMigrationSettingTab extends PluginSettingTab {
+	plugin: EvernoteMigrationPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: EvernoteMigrationPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
