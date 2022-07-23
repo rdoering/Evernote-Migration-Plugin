@@ -1,5 +1,7 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-import { Client } from 'evernote';
+import { Client as EvernoteClient } from 'evernote';
+import axios from 'axios';
+import { BrowserWindow } from "@electron/remote";
 
 
 interface EvernoteMigrationPluginSettings {
@@ -112,9 +114,10 @@ class ModalWindow extends Modal {
         .setButtonText("Evernote Auth")
         .setCta()
         .onClick(() => {
-          var callbackUrl = "obsidian://";
+          //var callbackUrl = "obsidian://";
+          var callbackUrl = "http://localhost/callback";
 
-          var client = new Client({
+          var evernoteClient = new EvernoteClient({
             consumerKey: this.settings.consumerKey,
             consumerSecret: this.settings.consumerSecret,
             sandbox: true,
@@ -123,17 +126,35 @@ class ModalWindow extends Modal {
 
           var myOauthToken: string;
           var myOauthTokenSecret: string;
-          client.getRequestToken(callbackUrl, (error: boolean, oauthToken: string, oauthTokenSecret: string) => {
+          evernoteClient.getRequestToken(callbackUrl, (error: any, oauthToken: string, oauthTokenSecret: string) => {
             if (error) {
               console.log('getRequestToken() failed');
             }
             // store your token here somewhere - for this example we use req.session
             myOauthToken = oauthToken;
             myOauthTokenSecret = oauthTokenSecret;
-            console.log('browse to ' + client.getAuthorizeUrl(oauthToken))
+
+
+            const url = evernoteClient.getAuthorizeUrl(oauthToken);
+            console.log('browse to ' + url);
+
+
+            const window = new BrowserWindow({
+						  width: 600,
+						  height: 800,
+						  webPreferences: {
+						    nodeIntegration: false, // We recommend disabling nodeIntegration for security.
+						    contextIsolation: true, // We recommend enabling contextIsolation for security.
+						    // see https://github.com/electron/electron/blob/master/docs/tutorial/security.md
+						  },
+						});
+
+						window.loadURL(url);
+
+            //const {data, status} =  axios.post(evernoteClient.getAuthorizeUrl(oauthToken)	);
             //.redirect(client.getAuthorizeUrl(oauthToken)); // send the user to Evernote
-            }
-          );
+            
+          });
 
 
           console.log('clicked by evernote migration plugin');

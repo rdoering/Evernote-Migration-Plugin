@@ -59,7 +59,7 @@ The location of the Obsidian plugin folder depends on the host operation system.
 - [x] add settings for "Consumer Key" and "Consumer Secret"
 - [x] import Evernote module
 - [ ] process oauth-response "oauth_token", "oauth_verifier", "sandbox_lnb"
-- [ ] redirect user to evernote login
+- [x] redirect user to evernote login
 - [ ] implemented evernote module
 - [ ] push
 
