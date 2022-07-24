@@ -16,6 +16,8 @@
 		"@types/node": "^16.11.6",
 		"@typescript-eslint/eslint-plugin": "5.29.0",
 		"@typescript-eslint/parser": "5.29.0",
+		"@types/electron": "^1.6.10",
+		"@types/oauth": "^0.9.1",
 		"builtin-modules": "3.3.0",
 		"esbuild": "0.14.47",
 		"obsidian": "latest",
@@ -24,7 +26,6 @@
 	},
 	"dependencies": {
 		"@electron/remote": "^2.0.8",
-		"@types/electron": "^1.6.10",
 		"axios": "^0.27.2",
 		"electron": "^19.0.9",
 		"evernote": "^2.0.5"

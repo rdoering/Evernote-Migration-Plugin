@@ -1,5 +1,5 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-import { Client as EvernoteClient } from 'evernote';
+import * as Evernote  from 'evernote';
 import axios from 'axios';
 import { BrowserWindow } from "@electron/remote";
 
@@ -117,7 +117,7 @@ class ModalWindow extends Modal {
           //var callbackUrl = "obsidian://";
           var callbackUrl = "http://localhost/callback";
 
-          var evernoteClient = new EvernoteClient({
+          var evernoteClient = new Evernote.Client({
             consumerKey: this.settings.consumerKey,
             consumerSecret: this.settings.consumerSecret,
             sandbox: true,
@@ -126,34 +126,59 @@ class ModalWindow extends Modal {
 
           var myOauthToken: string;
           var myOauthTokenSecret: string;
-          evernoteClient.getRequestToken(callbackUrl, (error: any, oauthToken: string, oauthTokenSecret: string) => {
+          evernoteClient.getRequestToken(callbackUrl, (error: {statusCode: number, data?: any}, oauthToken: string, oauthTokenSecret: string) => {
             if (error) {
-              console.log('getRequestToken() failed');
-            }
-            // store your token here somewhere - for this example we use req.session
-            myOauthToken = oauthToken;
-            myOauthTokenSecret = oauthTokenSecret;
+              console.log('failed to fetch request token (temp credentials) ' + error.statusCode);
+							console.log(error.data);
+            } else {
+            	console.log('fetched request token (temp credentials)');
 
+            	// store your token here somewhere - for this example we use req.session
+	            myOauthToken = oauthToken;
+	            myOauthTokenSecret = oauthTokenSecret;
 
-            const url = evernoteClient.getAuthorizeUrl(oauthToken);
-            console.log('browse to ' + url);
+	            const url = evernoteClient.getAuthorizeUrl(oauthToken);
+	            console.log('browse to ' + url);
 
+	            const window = new BrowserWindow({
+							  width: 600,
+							  height: 800,
+							  webPreferences: {
+							    nodeIntegration: false, // We recommend disabling nodeIntegration for security.
+							    contextIsolation: true, // We recommend enabling contextIsolation for security.
+							    // see https://github.com/electron/electron/blob/master/docs/tutorial/security.md
+							  },
+							});
 
-            const window = new BrowserWindow({
-						  width: 600,
-						  height: 800,
-						  webPreferences: {
-						    nodeIntegration: false, // We recommend disabling nodeIntegration for security.
-						    contextIsolation: true, // We recommend enabling contextIsolation for security.
-						    // see https://github.com/electron/electron/blob/master/docs/tutorial/security.md
-						  },
-						});
+							window.loadURL(url);
+							const {session: {webRequest}} = window.webContents;
 
-						window.loadURL(url);
+							const filter = {
+						    urls: [
+						      'http://localhost/callback*'
+						    ]
+						  };
 
-            //const {data, status} =  axios.post(evernoteClient.getAuthorizeUrl(oauthToken)	);
-            //.redirect(client.getAuthorizeUrl(oauthToken)); // send the user to Evernote
-            
+						  webRequest.onBeforeRequest(filter, async ({url}) => {
+						    console.log("user granted previleges to temp credentials (requestToken) " + url);
+						    var redirectUrl = new URL(url);
+						    var cbOauthVerifier = redirectUrl.searchParams.get('oauth_verifier') ?? '';
+						    evernoteClient.getAccessToken(myOauthToken, myOauthTokenSecret, cbOauthVerifier, 
+						    	(error: {statusCode: number, data?: any}, oauthAccessToken: string, oauthAccessTokenSecret: string, results: any) => {
+									if (error) {
+										console.log('failed to fetch access token (token credentials) ' + error.statusCode);
+										console.log(error.data);
+									} else {
+										console.log('fetched access token (token credentials) ' + oauthAccessToken);
+										window.close();
+									}
+						    });
+						  });
+
+						  window.on('closed', () => {
+						    console.log("onClose()");
+						  });
+            }            
           });
 
 
