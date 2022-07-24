@@ -2,6 +2,7 @@ import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Set
 import * as Evernote  from 'evernote';
 import axios from 'axios';
 import { BrowserWindow } from "@electron/remote";
+import { WebRequest } from 'electron'
 
 
 interface EvernoteMigrationPluginSettings {
@@ -114,7 +115,6 @@ class ModalWindow extends Modal {
         .setButtonText("Evernote Auth")
         .setCta()
         .onClick(() => {
-          //var callbackUrl = "obsidian://";
           var callbackUrl = "http://localhost/callback";
 
           var evernoteClient = new Evernote.Client({
@@ -150,7 +150,7 @@ class ModalWindow extends Modal {
 							  },
 							});
 
-							window.loadURL(url);
+						  window.loadURL(url);
 							const {session: {webRequest}} = window.webContents;
 
 							const filter = {
@@ -170,19 +170,16 @@ class ModalWindow extends Modal {
 										console.log(error.data);
 									} else {
 										console.log('fetched access token (token credentials) ' + oauthAccessToken);
-										window.close();
 									}
+									window.close();
 						    });
 						  });
 
 						  window.on('closed', () => {
-						    console.log("onClose()");
+						    console.log("window closed");
 						  });
             }            
           });
-
-
-          console.log('clicked by evernote migration plugin');
         })
     );
 	}

@@ -61,6 +61,7 @@ The location of the Obsidian plugin folder depends on the host operation system.
 - [x] process oauth-response "oauth_token", "oauth_verifier", "sandbox_lnb"
 - [x] redirect user to evernote login
 - [ ] refactor evernote implementation
+- [ ] store token credentials in settings
 
 ## API Documentation
 See https://github.com/obsidianmd/obsidian-api
